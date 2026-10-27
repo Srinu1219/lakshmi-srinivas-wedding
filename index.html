@@ -495,7 +495,7 @@ form .temple-bg { height: 38%; opacity: .3; }
       data.reminders = $("consent").checked ? "yes" : "no";
       data._subject = "Wedding RSVP: " + name;
       data._template = "table";
-      const r = await fetch("https://formsubmit.co/ajax/srinivassa9553@gmail.com", {
+      const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
       f.querySelectorAll("label, #save, .sub").forEach(el => el.hidden = true);
