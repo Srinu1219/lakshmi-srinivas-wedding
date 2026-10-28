@@ -524,6 +524,11 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
       data._subject = ["Wedding RSVP", clean(name), att === "yes" ? "Attending" : "Not attending", clean(data.guests), clean(phone), clean(email), "Reminder " + data.reminders].join(" | ");
       data._template = "table";
       data._cc = "srinivaspunugupati7@gmail.com";
+      if (email) {
+        data._autoresponse = att === "yes"
+          ? "Namaste " + name + ",\n\nThank you for your reply! We are so happy you will join us.\n\nWedding of Srinivasa Rao & Venkata Lakshmi\nWednesday, 25 November 2026 · Muhurtham 10:48 AM EST\nBridgewater Balaji Temple, 1 Balaji Temple Drive, Bridgewater, NJ 08807\nParking is available at the temple parking lot.\n\nInvitation and directions: https://srinu1219.github.io/lakshmi-srinivas-wedding/\nQuestions? Call or WhatsApp Srinivas at +1 (484) 588-1413.\n\nWith love and blessings,\nLakshmi & Srinivas"
+          : "Namaste " + name + ",\n\nThank you for letting us know. We will miss you, and your blessings mean a lot to us.\n\nWith love,\nLakshmi & Srinivas";
+      }
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
