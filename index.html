@@ -532,13 +532,12 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
       data._subject = ["Wedding RSVP", clean(name), att === "yes" ? "Attending" : "Not attending", clean(data.guests), clean(phone), clean(email), "Reminder " + data.reminders].join(" | ");
       data._template = "table";
       data._cc = "srinivaspunugupati7@gmail.com";
-      if (email) {
-        data._autoresponse = att === "yes"
-          ? "Namaste " + name + ",\n\nThank you for your reply! We are so happy you will join us.\n\nWedding of Srinivasa Rao & Venkata Lakshmi\nWednesday, 25 November 2026 · Muhurtham 10:48 AM EST\nBridgewater Balaji Temple, 1 Balaji Temple Drive, Bridgewater, NJ 08807\nParking is available at the temple parking lot.\n\nInvitation and directions: https://srinu1219.github.io/lakshmi-srinivas-wedding/\nQuestions? Call or WhatsApp Srinivas at +1 (484) 588-1413.\n\nWith love and blessings,\nLakshmi & Srinivas"
-          : "Namaste " + name + ",\n\nThank you for letting us know. We will miss you, and your blessings mean a lot to us.\n\nWith love,\nLakshmi & Srinivas";
-      }
+      const ctl = ("AbortController" in window) ? new AbortController() : null;
+      const timer = setTimeout(() => { if (ctl) ctl.abort(); }, 20000);
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
-        method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
+        method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data),
+        signal: ctl ? ctl.signal : undefined });
+      clearTimeout(timer);
       if (!r.ok) throw new Error(r.status);
       f.querySelectorAll("label, fieldset, #save, .sub, .note").forEach(el => el.hidden = true);
       f.classList.add("done");
@@ -546,7 +545,7 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
       msg(att === "yes" ? "Thank you, " + name + "! " + (data.reminders === "yes" ? "We'll send you a reminder before 25 November. " : "") + "We can't wait to see you."
                         : "Thank you for letting us know, " + name + ". We'll miss you, and your blessings mean a lot to us.", "ok");
     } catch (e) {
-      msg("Your details weren't sent. Please check your connection and try again.", "err");
+      msg(e && e.name === "AbortError" ? "This is taking too long. Please tap Send my details again." : "Your details weren't sent. Please check your connection and try again.", "err");
     } finally { $("save").disabled = false; }
   });
 })();
