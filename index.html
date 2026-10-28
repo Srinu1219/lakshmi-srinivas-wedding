@@ -367,6 +367,14 @@ form label.choice { display: flex; align-items: center; gap: 12px; padding: 12px
   font-family: var(--body); font-size: 19px; letter-spacing: 0; text-transform: none; color: var(--sepia); background: rgba(138,90,28,.06); cursor: pointer; }
 form label.choice input { width: 20px; height: 20px; margin: 0; accent-color: #8a5a1c; flex: none; }
 form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-color: var(--antique); }
+
+/* ---- Form fixes: visible cursor, clear answer circles, big thank-you */
+form input { caret-color: #3b1d10; }
+form label.choice input { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; margin: 0; flex: none;
+  border: 2px solid var(--antique); border-radius: 50%; background: rgba(255,250,235,.7); cursor: pointer; }
+form label.choice input:checked { background: radial-gradient(circle, var(--antique) 0 42%, rgba(255,250,235,.7) 47%); }
+form label.choice input:focus-visible { outline: 2px solid var(--sepia); outline-offset: 2px; }
+form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.35; color: var(--sepia); padding: 18px 4px 10px; }
 </style>
 </head>
 <body>
@@ -532,7 +540,9 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
-      f.querySelectorAll("label, fieldset, #save, .sub").forEach(el => el.hidden = true);
+      f.querySelectorAll("label, fieldset, #save, .sub, .note").forEach(el => el.hidden = true);
+      f.classList.add("done");
+      setTimeout(() => { try { f.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { f.scrollIntoView(); } }, 50);
       msg(att === "yes" ? "Thank you, " + name + "! " + (data.reminders === "yes" ? "We'll send you a reminder before 25 November. " : "") + "We can't wait to see you."
                         : "Thank you for letting us know, " + name + ". We'll miss you, and your blessings mean a lot to us.", "ok");
     } catch (e) {
