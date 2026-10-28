@@ -520,6 +520,7 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
       if (SHEET_URL) { try { fetch(SHEET_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) }).catch(() => {}); } catch (e) {} }
       data._subject = "Wedding RSVP: " + name + (att === "yes" ? " (attending, " + data.guests + ")" : " (not attending)");
       data._template = "table";
+      data._cc = "srinivaspunugupati7@gmail.com";
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
