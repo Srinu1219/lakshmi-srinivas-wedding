@@ -359,6 +359,14 @@ form .temple-bg { height: 38%; opacity: .3; }
 .contact-num { font-family: var(--display); font-size: 22px; letter-spacing: .06em; color: var(--sepia); text-decoration: none; border-bottom: 1px solid rgba(138,90,28,.45); padding-bottom: 2px; }
 .contact-num:hover { color: var(--antique); }
 .contact-name { font-family: var(--script); font-size: 30px; line-height: 1.2; color: var(--antique); }
+
+/* ---- Attendance choice */
+form fieldset.attend { border: 0; margin: 0; padding: 0; display: grid; gap: 10px; }
+form fieldset.attend legend { padding: 0; margin-bottom: 8px; font-family: var(--display); font-size: 12px; letter-spacing: .14em; text-transform: uppercase; color: var(--antique); }
+form label.choice { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid rgba(138,90,28,.45); border-radius: 999px;
+  font-family: var(--body); font-size: 19px; letter-spacing: 0; text-transform: none; color: var(--sepia); background: rgba(138,90,28,.06); cursor: pointer; }
+form label.choice input { width: 20px; height: 20px; margin: 0; accent-color: #8a5a1c; flex: none; }
+form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-color: var(--antique); }
 </style>
 </head>
 <body>
@@ -458,10 +466,15 @@ form .temple-bg { height: 38%; opacity: .3; }
     <label for="email">Email
       <input id="email" name="email" type="email" autocomplete="email">
     </label>
-    <label for="guests">Number of guests
+    <fieldset class="attend" id="attendSet">
+      <legend>Will you attend? *</legend>
+      <label class="choice"><input type="radio" name="attending" value="yes"> Joyfully attending</label>
+      <label class="choice"><input type="radio" name="attending" value="no"> Regretfully can't attend</label>
+    </fieldset>
+    <label for="guests" id="guestsLbl">Number of guests (including you)
       <input id="guests" name="guests" type="number" min="1" max="20" inputmode="numeric" placeholder="e.g. 4">
     </label>
-    <label class="consent" for="consent"><input id="consent" name="reminders" type="checkbox" value="yes" checked> Yes, remind me before the wedding</label>
+    <label class="consent" for="consent" id="consentLbl"><input id="consent" name="reminders" type="checkbox" value="yes" checked> Yes, remind me before the wedding</label>
     <button class="primary" id="save" type="submit">Send my details</button>
     <p class="msg" id="msg" role="status"></p>
     <p class="note">Your details are seen only by our family.</p>
@@ -481,6 +494,13 @@ form .temple-bg { height: 38%; opacity: .3; }
     setTimeout(() => { btn.textContent = old; }, 2000);
   }
   $("copyAddr").addEventListener("click", () => copyText($("addr").textContent, $("copyAddr")));
+  // Google Sheet web app URL for the guest dashboard (empty until set up)
+  const SHEET_URL = "";
+  document.querySelectorAll('input[name="attending"]').forEach(r => r.addEventListener("change", () => {
+    const yes = r.value === "yes" && r.checked;
+    if (!r.checked) return;
+    $("guestsLbl").hidden = !yes; $("consentLbl").hidden = !yes;
+  }));
   const msg = (t, cls) => { $("msg").textContent = t; $("msg").className = "msg " + (cls || ""); };
   $("rsvp").addEventListener("submit", async (ev) => {
     ev.preventDefault();
@@ -489,17 +509,23 @@ form .temple-bg { height: 38%; opacity: .3; }
     if (!phone && !email) { msg("Please add your WhatsApp number or email so we can send you a reminder.", "err"); $("phone").focus(); return; }
     if (phone && phone.replace(/\D/g, "").length < 8) { msg("Please check the WhatsApp number, including the country code.", "err"); $("phone").focus(); return; }
     if (email && !/^\S+@\S+\.\S+$/.test(email)) { msg("That email address doesn't look right. Please check it.", "err"); $("email").focus(); return; }
+    const att = (f.querySelector('input[name="attending"]:checked') || {}).value;
+    if (!att) { msg("Please let us know if you will attend.", "err"); $("attendSet").scrollIntoView({ block: "center" }); return; }
     $("save").disabled = true; msg("Sending…");
     try {
       const data = Object.fromEntries(new FormData(f).entries());
-      data.reminders = $("consent").checked ? "yes" : "no";
-      data._subject = "Wedding RSVP: " + name;
+      data.attending = att;
+      if (att === "no") data.guests = "0"; else data.guests = data.guests || "1";
+      data.reminders = att === "yes" && $("consent").checked ? "yes" : "no";
+      if (SHEET_URL) { try { fetch(SHEET_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) }).catch(() => {}); } catch (e) {} }
+      data._subject = "Wedding RSVP: " + name + (att === "yes" ? " (attending, " + data.guests + ")" : " (not attending)");
       data._template = "table";
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
-      f.querySelectorAll("label, #save, .sub").forEach(el => el.hidden = true);
-      msg("Thank you, " + name + "! We'll send you a reminder before 25 November. We can't wait to see you.", "ok");
+      f.querySelectorAll("label, fieldset, #save, .sub").forEach(el => el.hidden = true);
+      msg(att === "yes" ? "Thank you, " + name + "! We'll send you a reminder before 25 November. We can't wait to see you."
+                        : "Thank you for letting us know, " + name + ". We'll miss you, and your blessings mean a lot to us.", "ok");
     } catch (e) {
       msg("Your details weren't sent. Please check your connection and try again.", "err");
     } finally { $("save").disabled = false; }
