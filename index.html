@@ -528,7 +528,7 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
         method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" }, body: JSON.stringify(data) });
       if (!r.ok) throw new Error(r.status);
       f.querySelectorAll("label, fieldset, #save, .sub").forEach(el => el.hidden = true);
-      msg(att === "yes" ? "Thank you, " + name + "! We'll send you a reminder before 25 November. We can't wait to see you."
+      msg(att === "yes" ? "Thank you, " + name + "! " + (data.reminders === "yes" ? "We'll send you a reminder before 25 November. " : "") + "We can't wait to see you."
                         : "Thank you for letting us know, " + name + ". We'll miss you, and your blessings mean a lot to us.", "ok");
     } catch (e) {
       msg("Your details weren't sent. Please check your connection and try again.", "err");
