@@ -472,7 +472,7 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
       <label class="choice"><input type="radio" name="attending" value="no"> Regretfully can't attend</label>
     </fieldset>
     <label for="guests" id="guestsLbl">Number of guests (including you)
-      <input id="guests" name="guests" type="number" min="1" max="20" inputmode="numeric" placeholder="e.g. 4">
+      <input id="guests" name="guests" type="number" min="1" max="20" inputmode="numeric" autocomplete="off" placeholder="e.g. 4">
     </label>
     <label class="consent" for="consent" id="consentLbl"><input id="consent" name="reminders" type="checkbox" value="yes" checked> Yes, remind me before the wedding</label>
     <button class="primary" id="save" type="submit">Send my details</button>
@@ -511,6 +511,8 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
     if (email && !/^\S+@\S+\.\S+$/.test(email)) { msg("That email address doesn't look right. Please check it.", "err"); $("email").focus(); return; }
     const att = (f.querySelector('input[name="attending"]:checked') || {}).value;
     if (!att) { msg("Please let us know if you will attend.", "err"); $("attendSet").scrollIntoView({ block: "center" }); return; }
+    const gv = $("guests").value.trim();
+    if (att === "yes" && gv && !(/^\d{1,2}$/.test(gv) && +gv >= 1 && +gv <= 20)) { msg("Please enter how many people are coming (1 to 20).", "err"); $("guests").focus(); return; }
     $("save").disabled = true; msg("Sending…");
     try {
       const data = Object.fromEntries(new FormData(f).entries());
