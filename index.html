@@ -520,7 +520,8 @@ form label.choice:has(input:checked) { background: rgba(138,90,28,.16); border-c
       if (att === "no") data.guests = "0"; else data.guests = data.guests || "1";
       data.reminders = att === "yes" && $("consent").checked ? "yes" : "no";
       if (SHEET_URL) { try { fetch(SHEET_URL, { method: "POST", mode: "no-cors", body: new URLSearchParams(data) }).catch(() => {}); } catch (e) {} }
-      data._subject = "Wedding RSVP: " + name + (att === "yes" ? " (attending, " + data.guests + ")" : " (not attending)");
+      const clean = (v) => String(v || "-").replace(/[|\r\n]+/g, "/").trim() || "-";
+      data._subject = ["Wedding RSVP", clean(name), att === "yes" ? "Attending" : "Not attending", clean(data.guests), clean(phone), clean(email), "Reminder " + data.reminders].join(" | ");
       data._template = "table";
       data._cc = "srinivaspunugupati7@gmail.com";
       const r = await fetch("https://formsubmit.co/ajax/1bfd16d087f3d8be6a3361ea92785c1d", {
