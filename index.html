@@ -390,6 +390,15 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
   @keyframes subhamglow { 0% { filter: drop-shadow(0 0 0 rgba(228,183,90,0)); transform: scale(.94); } 40% { filter: drop-shadow(0 0 18px rgba(228,183,90,.9)); transform: scale(1.06); } 100% { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); transform: scale(1); } }
 }
 footer.glow .fin { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); }
+
+/* ---- Book-style page opening: each page swings open from its spine */
+html.book main > .heart, html.book main > .invite, html.book main > #rsvp {
+  transform-origin: left center; transform: perspective(1800px) rotateY(-96deg); opacity: .0;
+  transition: transform 1.5s cubic-bezier(.3,.7,.2,1), opacity .5s ease; backface-visibility: hidden; will-change: transform; }
+html.book main > .turned { transform: perspective(1800px) rotateY(0deg) !important; opacity: 1 !important; }
+html.book main > .heart::before, html.book main > .invite::after, html.book #rsvp .page-shade {
+  content: ""; }
+html.book main > .turning-shadow { box-shadow: -30px 0 60px rgba(0,0,0,.5); }
 </style>
 </head>
 <body>
@@ -575,7 +584,7 @@ footer.glow .fin { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); }
 (function () {
   const gate = document.getElementById("gate");
   let opened = false;
-  const song = new Audio("music.mp3");
+  const song = new Audio("music.mp3?v=2");
   song.loop = true; song.preload = "auto"; song.volume = 0;
   const muteBtn = document.getElementById("muteBtn");
   let fading = null, wantOn = false;
@@ -710,5 +719,20 @@ footer.glow .fin { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); }
     const mo = new MutationObserver(() => { if (gate.classList.contains("open")) { mo.disconnect(); setTimeout(start, 6200); } });
     mo.observe(gate, { attributes: true, attributeFilter: ["class"] });
   }
+})();
+</script>
+
+<script>
+/* Each page opens like turning a book page as it comes into view. */
+(function () {
+  if (!("IntersectionObserver" in window)) return;
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  document.documentElement.classList.add("book");
+  const pages = document.querySelectorAll("main > .heart, main > .invite, main > #rsvp");
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("turned"); io.unobserve(e.target); } });
+  }, { root: null, rootMargin: "0px 0px -18% 0px", threshold: 0 });
+  pages.forEach((p) => io.observe(p));
+  setTimeout(() => pages.forEach((p) => { if (p.getBoundingClientRect().top < innerHeight * 0.82) p.classList.add("turned"); }), 50);
 })();
 </script>
