@@ -383,6 +383,13 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
 .music-btn.off { opacity: .75; }
 @media (prefers-reduced-motion: no-preference) { .music-btn:not(.off) { animation: musicpulse 2.4s ease-in-out infinite; } }
 @keyframes musicpulse { 50% { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 0 6px rgba(228,183,90,.18); } }
+
+/* ---- Śubham glow after the reply */
+@media (prefers-reduced-motion: no-preference) {
+  footer.glow .fin { animation: subhamglow 2.4s ease-out 1; }
+  @keyframes subhamglow { 0% { filter: drop-shadow(0 0 0 rgba(228,183,90,0)); transform: scale(.94); } 40% { filter: drop-shadow(0 0 18px rgba(228,183,90,.9)); transform: scale(1.06); } 100% { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); transform: scale(1); } }
+}
+footer.glow .fin { filter: drop-shadow(0 0 6px rgba(228,183,90,.4)); }
 </style>
 </head>
 <body>
@@ -498,7 +505,7 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
   </form>
 
 
-  <footer><div class="rule"></div><span class="foil fin">Śubham</span><span>With love and blessings,<br>Lakshmi &amp; Srinivas</span></footer>
+  <footer id="subham"><div class="rule"></div><span class="foil fin">Śubham</span><span>With love and blessings,<br>Lakshmi &amp; Srinivas</span></footer>
 </main>
 
 <script>
@@ -554,6 +561,7 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
       f.querySelectorAll("label, fieldset, #save, .sub, .note").forEach(el => el.hidden = true);
       f.classList.add("done");
       setTimeout(() => { try { f.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { f.scrollIntoView(); } }, 50);
+      setTimeout(() => { const sb = document.getElementById("subham"); if (sb) { sb.classList.add("glow"); try { sb.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { sb.scrollIntoView(); } } }, 3200);
       msg(att === "yes" ? "Thank you, " + name + "! " + (email ? "We'll email you the wedding details soon. " : "") + "We can't wait to see you."
                         : "Thank you for letting us know, " + name + ". We'll miss you, and your blessings mean a lot to us.", "ok");
     } catch (e) {
@@ -662,3 +670,45 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
 
 </body>
 </html>
+
+<script>
+/* Guided show: after the card opens, scroll gently page by page and stop at the reply form. */
+(function () {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const gate = document.getElementById("gate");
+  const form = document.getElementById("rsvp");
+  const stops = () => Array.from(document.querySelectorAll("main > .fold-wrap, main > .heart, main > .invite, main > #rsvp"));
+  const SPEED = 55, PAUSE = 2200, IDLE = 6000, TOP = 18;
+  let running = false, done = false, holdUntil = 0, idleUntil = 0, last = 0, passed = new Set();
+
+  function tick(t) {
+    if (done) return;
+    const dt = last ? Math.min(100, t - last) : 16; last = t;
+    if (running && t > holdUntil && t > idleUntil) {
+      const fTop = form.getBoundingClientRect().top;
+      if (fTop <= TOP) { done = true; return; }
+      for (const el of stops()) {
+        const top = el.getBoundingClientRect().top;
+        if (!passed.has(el) && top <= TOP + 2) {
+          passed.add(el);
+          if (el !== stops()[0]) { holdUntil = t + PAUSE; requestAnimationFrame(tick); return; }
+        }
+      }
+      const before = window.scrollY;
+      window.scrollBy(0, Math.min(SPEED * dt / 1000, Math.max(1, fTop - TOP)));
+      if (window.scrollY === before && fTop > TOP) { done = true; return; }
+    }
+    requestAnimationFrame(tick);
+  }
+  function pauseForUser() { if (running && !done) idleUntil = performance.now() + IDLE; }
+  ["wheel", "touchstart", "keydown", "mousedown"].forEach((ev) => window.addEventListener(ev, pauseForUser, { passive: true }));
+  form.addEventListener("focusin", () => { done = true; });
+
+  function start() { if (running) return; running = true; holdUntil = performance.now() + 2500; requestAnimationFrame(tick); }
+  if (!gate || gate.hidden) { setTimeout(start, 4000); }
+  else {
+    const mo = new MutationObserver(() => { if (gate.classList.contains("open")) { mo.disconnect(); setTimeout(start, 6200); } });
+    mo.observe(gate, { attributes: true, attributeFilter: ["class"] });
+  }
+})();
+</script>
