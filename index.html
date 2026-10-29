@@ -408,7 +408,7 @@ html.deck .leaf { position: absolute; inset: 0; overflow-y: auto; overflow-x: hi
   visibility: hidden; backface-visibility: hidden; transform-style: preserve-3d; background: transparent; }
 html.deck .leaf > * { max-width: 580px; margin-left: auto; margin-right: auto; }
 html.deck .leaf.cur, html.deck .leaf.going { visibility: visible; }
-html.deck .leaf.going { z-index: 3; pointer-events: none; }
+html.deck .leaf.going { z-index: 3; pointer-events: none; overflow: hidden; }
 html.deck .leaf.cur { z-index: 2; }
 html.deck .leaf.center { display: grid; align-content: center; }
 .deck-nav { position: fixed; z-index: 30; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); display: flex; justify-content: center; align-items: center; gap: 14px; pointer-events: none; }
@@ -418,22 +418,23 @@ html.deck .leaf.center { display: grid; align-content: center; }
 .deck-dots { display: flex; gap: 7px; pointer-events: none; }
 .deck-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(228,183,90,.35); }
 .deck-dots i.on { background: #e4b75a; transform: scale(1.3); }
-@keyframes out-flip { to { transform: rotateY(-115deg); filter: brightness(.6); } }
-@keyframes in-flip { from { filter: brightness(.55); } to { filter: none; } }
-@keyframes out-slide { to { transform: translateX(-35%) scale(.92); opacity: 0; } }
-@keyframes in-slide { from { transform: translateX(100%); box-shadow: -30px 0 50px rgba(0,0,0,.5); } to { transform: none; } }
-@keyframes out-fold { to { transform: rotateX(80deg) translateY(-10%); opacity: 0; } }
-@keyframes in-fold { from { transform: rotateX(-70deg); opacity: 0; } to { transform: none; opacity: 1; } }
-@keyframes out-zoom { to { transform: scale(1.12); opacity: 0; filter: blur(3px); } }
-@keyframes in-zoom { from { transform: scale(.86); opacity: 0; } to { transform: none; opacity: 1; } }
-.leaf.going.fx-flip { transform-origin: left center; animation: out-flip 1.3s cubic-bezier(.45,.05,.3,1) forwards; }
-.leaf.cur.fx-flip { animation: in-flip 1.3s ease forwards; }
-.leaf.going.fx-slide { animation: out-slide 1.1s cubic-bezier(.45,.05,.3,1) forwards; }
-.leaf.cur.fx-slide { z-index: 4; animation: in-slide 1.1s cubic-bezier(.3,.7,.2,1) forwards; }
-.leaf.going.fx-fold { transform-origin: center top; animation: out-fold 1.1s ease-in forwards; }
-.leaf.cur.fx-fold { transform-origin: center bottom; animation: in-fold 1.2s cubic-bezier(.3,.7,.2,1) .25s both; }
-.leaf.going.fx-zoom { animation: out-zoom 1s ease forwards; }
-.leaf.cur.fx-zoom { animation: in-zoom 1.1s cubic-bezier(.3,.7,.2,1) .15s both; }
+html.deck .leaf.going > * { transform-origin: left center; backface-visibility: hidden;
+  animation: pageturn 1.7s cubic-bezier(.5,.08,.25,1) forwards; }
+@keyframes pageturn {
+  0%   { transform: perspective(2400px) rotateY(0deg); filter: brightness(1); box-shadow: none; }
+  35%  { filter: brightness(1.04); }
+  100% { transform: perspective(2400px) rotateY(-92deg); filter: brightness(.55); } }
+html.deck .leaf.arrive::after { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 100vh; pointer-events: none; z-index: 40;
+  background: linear-gradient(90deg, rgba(20,2,4,.55), rgba(20,2,4,0) 75%); animation: undershadow 1.7s ease forwards; }
+@keyframes undershadow { 0% { opacity: 1; } 100% { opacity: 0; } }
+
+/* ---- Text writes itself as each page opens */
+html.deck .wr { opacity: 0; }
+html.deck .wr.pen { opacity: 1; clip-path: inset(-20% 100% -20% 0); }
+html.deck .wr.go { animation: wr-fade .9s ease forwards; animation-delay: var(--d, 0s); }
+html.deck .wr.pen.go { animation: wr-pen 1.6s cubic-bezier(.45,.1,.35,1) forwards; animation-delay: var(--d, 0s); }
+@keyframes wr-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes wr-pen { from { clip-path: inset(-20% 100% -20% 0); } to { clip-path: inset(-20% -2% -20% 0); } }
 </style>
 </head>
 <body>
@@ -729,25 +730,42 @@ html.deck .leaf.center { display: grid; align-content: center; }
   leaves[lastLeaf].classList.add("center");
   const nav = document.getElementById("deckNav"), dots = document.getElementById("deckDots");
   leaves.forEach(() => dots.appendChild(document.createElement("i")));
-  const FX = ["flip", "slide", "fold", "zoom"];
-  let cur = 0, busy = false, auto = false, idleUntil = 0, holdUntil = 0, last = 0, turns = 0;
+  let cur = 0, busy = false, auto = false, idleUntil = 0, holdUntil = 0, last = 0;
   leaves[0].classList.add("cur");
+  const PEN = "h1, h2, .tag, .big, .fin, .monogram-wrap, .when strong, .place b";
+  const TXT = ".eyebrow, .blessing, .verse, .sub, .when, .place > span, .shloka .sl, .muhurtham, .venue-note, .contact, footer > span:last-child, .om, .rule, .links, .emblem-wrap";
+  function prep(leaf) {
+    const els = Array.from(leaf.querySelectorAll(PEN + "," + TXT)).filter((el) => !el.closest(".flap") && !el.closest("form label") && !el.parentElement.closest(".wr"));
+    els.forEach((el) => { el.classList.add("wr"); if (el.matches(PEN)) el.classList.add("pen"); });
+    leaf._wr = els;
+  }
+  function write(leaf) {
+    if (!leaf._wr || leaf._written) return; leaf._written = true;
+    let d = 0;
+    leaf._wr.forEach((el) => { el.style.setProperty("--d", d.toFixed(2) + "s"); el.classList.add("go"); d += el.classList.contains("pen") ? 0.7 : 0.28; d = Math.min(d, 6); });
+  }
+  leaves.forEach(prep);
+  const fw = document.getElementById("foldWrap");
+  if (fw) {
+    const fo = new MutationObserver(() => { if (fw.classList.contains("unfold")) { fo.disconnect(); setTimeout(() => write(leaves[0]), 500); } });
+    fo.observe(fw, { attributes: true, attributeFilter: ["class"] });
+    if (fw.classList.contains("unfold")) setTimeout(() => write(leaves[0]), 500);
+  } else write(leaves[0]);
   function paint() { Array.from(dots.children).forEach((d, i) => d.classList.toggle("on", i === cur)); }
   paint();
-  function go(to, fxName) {
+  function go(to) {
     if (busy || to === cur || to < 0 || to > lastLeaf) return;
     busy = true;
     const from = leaves[cur], next = leaves[to];
-    const fx = fxName || FX[turns++ % FX.length];
     next.scrollTop = 0;
-    [from, next].forEach((l) => l.classList.remove(...FX.map((f) => "fx-" + f)));
-    from.classList.remove("cur"); from.classList.add("going", "fx-" + fx);
-    next.classList.add("cur", "fx-" + fx);
+    from.classList.remove("cur"); from.classList.add("going");
+    next.classList.add("cur", "arrive");
+    setTimeout(() => write(next), 500);
     cur = to; paint();
-    holdUntil = performance.now() + 3000;
-    setTimeout(() => { from.classList.remove("going", "fx-" + fx); next.classList.remove("fx-" + fx); busy = false; }, 1500);
+    holdUntil = performance.now() + 4800;
+    setTimeout(() => { from.classList.remove("going"); next.classList.remove("arrive"); busy = false; }, 1750);
   }
-  window.__deckShow = (el) => { const i = leaves.findIndex((l) => l.contains(el)); if (i >= 0) { auto = false; go(i, "flip"); } };
+  window.__deckShow = (el) => { const i = leaves.findIndex((l) => l.contains(el)); if (i >= 0) { auto = false; go(i); } };
   document.getElementById("deckNext").addEventListener("click", () => { idleUntil = performance.now() + 8000; go(cur + 1); });
   document.getElementById("deckPrev").addEventListener("click", () => { idleUntil = performance.now() + 8000; go(cur - 1); });
   let sx = null, sy = null;
@@ -772,7 +790,7 @@ html.deck .leaf.center { display: grid; align-content: center; }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
-  function start() { auto = true; nav.hidden = false; holdUntil = performance.now() + 1500; }
+  function start() { auto = true; nav.hidden = false; holdUntil = performance.now() + 3500; }
   const gate = document.getElementById("gate");
   if (!gate || gate.hidden) setTimeout(start, 3000);
   else {
