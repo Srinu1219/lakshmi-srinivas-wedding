@@ -512,6 +512,23 @@ html.deck .leaf.going.fx-right > * { transform-origin: right center; animation-n
 @keyframes pageright { 0% { transform: perspective(2400px) rotateY(0deg); filter: brightness(1); } 35% { filter: brightness(1.04); } 100% { transform: perspective(2400px) rotateY(92deg); filter: brightness(.55); } }
 html.deck .leaf.arrive.fx-up::after { background: linear-gradient(180deg, rgba(20,2,4,.55), rgba(20,2,4,0) 75%); }
 html.deck .leaf.arrive.fx-right::after { background: linear-gradient(270deg, rgba(20,2,4,.55), rgba(20,2,4,0) 75%); }
+
+/* ---- Paper fold and open styles */
+html.deck .leaf.going.fx-fold > * { transform-origin: center center; animation: foldshut .8s cubic-bezier(.5,.05,.6,.4) forwards; }
+html.deck .leaf.cur.fx-fold > * { transform-origin: center center; animation: foldopen .95s cubic-bezier(.2,.7,.25,1) .75s both; }
+@keyframes foldshut { 0% { transform: perspective(1600px) rotateX(0deg) scaleY(1); filter: brightness(1); }
+  100% { transform: perspective(1600px) rotateX(88deg) scaleY(.85); filter: brightness(.5); } }
+@keyframes foldopen { 0% { transform: perspective(1600px) rotateX(-88deg) scaleY(.85); filter: brightness(.5); }
+  100% { transform: perspective(1600px) rotateX(0deg) scaleY(1); filter: brightness(1); } }
+html.deck .leaf.arrive.fx-fold::after, html.deck .leaf.arrive.fx-open::after { display: none; }
+html.deck .leaf.going.fx-open > * { animation: openout 1.2s ease forwards; }
+html.deck .leaf.cur.fx-open { z-index: 4; }
+html.deck .leaf.cur.fx-open > * { animation: openin 1.3s cubic-bezier(.3,.7,.2,1) .1s both; }
+@keyframes openout { to { transform: scale(.94); filter: brightness(.6); } }
+@keyframes openin { 0% { clip-path: inset(0 50% 0 50%); filter: brightness(.8); }
+  100% { clip-path: inset(0 0 0 0); filter: brightness(1); } }
+#deckDots { display: none !important; }
+.deck-nav { gap: 22px; }
 </style>
 </head>
 <body>
@@ -842,13 +859,13 @@ html.deck .leaf.arrive.fx-right::after { background: linear-gradient(270deg, rgb
     busy = true;
     const from = leaves[cur], next = leaves[to];
     next.scrollTop = 0; scroller(next).scrollTop = 0;
-    const fx = ["fx-left", "fx-up", "fx-right"][turnCount++ % 3];
+    const fx = ["fx-left", "fx-fold", "fx-up", "fx-open", "fx-right"][turnCount++ % 5];
     from.classList.remove("cur"); from.classList.add("going", fx);
     next.classList.add("cur", "arrive", fx);
     setTimeout(() => write(next), 500);
     cur = to; paint();
     holdUntil = performance.now() + 4800;
-    setTimeout(() => { from.classList.remove("going", fx); next.classList.remove("arrive", fx); busy = false; }, 1750);
+    setTimeout(() => { from.classList.remove("going", fx); next.classList.remove("arrive", fx); busy = false; }, fx === "fx-fold" ? 1800 : 1750);
   }
   window.__deckShow = (el) => { const i = leaves.findIndex((l) => l.contains(el)); if (i >= 0) { auto = false; go(i); } };
   document.getElementById("deckNext").addEventListener("click", () => { idleUntil = performance.now() + 8000; go(cur + 1); });
