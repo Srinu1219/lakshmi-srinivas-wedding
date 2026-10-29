@@ -498,6 +498,20 @@ html:not(.deck) footer .monogram-wrap.small, html:not(.deck) footer .fin-date { 
 html.deck .temple-bg { opacity: .24 !important; height: 38% !important; }
 html.deck .venue .temple-bg { opacity: .2 !important; }
 html.deck .first-date { color: var(--sepia-2); }
+
+/* ---- Couple portrait on the names page */
+.couple-photo { margin: 0 auto; width: 168px; height: 168px; border-radius: 50%; padding: 6px; position: relative;
+  background: var(--foil-dark); box-shadow: 0 0 0 3px var(--parch), 0 0 0 4px rgba(138,90,28,.6), 0 10px 22px rgba(90,50,15,.3); }
+.couple-photo img { display: block; width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: var(--parch); }
+html.deck .names { gap: 10px; }
+html.deck .names h1 { font-size: clamp(40px, 11vw, 56px); }
+/* ---- Varied page turns */
+html.deck .leaf.going.fx-up > * { transform-origin: center top; animation-name: pageup; }
+html.deck .leaf.going.fx-right > * { transform-origin: right center; animation-name: pageright; }
+@keyframes pageup { 0% { transform: perspective(2400px) rotateX(0deg); filter: brightness(1); } 35% { filter: brightness(1.04); } 100% { transform: perspective(2400px) rotateX(88deg); filter: brightness(.55); } }
+@keyframes pageright { 0% { transform: perspective(2400px) rotateY(0deg); filter: brightness(1); } 35% { filter: brightness(1.04); } 100% { transform: perspective(2400px) rotateY(92deg); filter: brightness(.55); } }
+html.deck .leaf.arrive.fx-up::after { background: linear-gradient(180deg, rgba(20,2,4,.55), rgba(20,2,4,0) 75%); }
+html.deck .leaf.arrive.fx-right::after { background: linear-gradient(270deg, rgba(20,2,4,.55), rgba(20,2,4,0) 75%); }
 </style>
 </head>
 <body>
@@ -536,6 +550,7 @@ html.deck .first-date { color: var(--sepia-2); }
   <section class="heart names" aria-label="The couple">
     <div class="temple-bg" aria-hidden="true"></div>
     <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <figure class="couple-photo"><img src="couple.webp" width="400" height="400" alt="Srinivasa Rao and Venkata Lakshmi"></figure>
     <div class="eyebrow">Together with our families</div>
     <h1 class="foil">$rinivasa Rao<span class="amp">&amp;</span>Venkata Lakshmi</h1>
     <p class="blessing">Bound by dharma, blessed by the Lord, united for seven lifetimes.</p>
@@ -798,7 +813,7 @@ html.deck .first-date { color: var(--sepia-2); }
   leaves[lastLeaf].classList.add("center");
   const nav = document.getElementById("deckNav"), dots = document.getElementById("deckDots");
   leaves.forEach(() => dots.appendChild(document.createElement("i")));
-  let cur = 0, busy = false, auto = false, idleUntil = 0, holdUntil = 0, last = 0;
+  let cur = 0, busy = false, auto = false, idleUntil = 0, holdUntil = 0, last = 0, turnCount = 0;
   leaves[0].classList.add("cur");
   const PEN = "h1, h2, .tag, .big, .fin, .monogram-wrap, .when strong, .place b";
   const TXT = ".eyebrow, .blessing, .verse, .sub, .when, .place > span, .shloka .sl, .muhurtham, .venue-note, .contact, footer > span:last-child, .om, .rule, .links, .emblem-wrap";
@@ -827,12 +842,13 @@ html.deck .first-date { color: var(--sepia-2); }
     busy = true;
     const from = leaves[cur], next = leaves[to];
     next.scrollTop = 0; scroller(next).scrollTop = 0;
-    from.classList.remove("cur"); from.classList.add("going");
-    next.classList.add("cur", "arrive");
+    const fx = ["fx-left", "fx-up", "fx-right"][turnCount++ % 3];
+    from.classList.remove("cur"); from.classList.add("going", fx);
+    next.classList.add("cur", "arrive", fx);
     setTimeout(() => write(next), 500);
     cur = to; paint();
     holdUntil = performance.now() + 4800;
-    setTimeout(() => { from.classList.remove("going"); next.classList.remove("arrive"); busy = false; }, 1750);
+    setTimeout(() => { from.classList.remove("going", fx); next.classList.remove("arrive", fx); busy = false; }, 1750);
   }
   window.__deckShow = (el) => { const i = leaves.findIndex((l) => l.contains(el)); if (i >= 0) { auto = false; go(i); } };
   document.getElementById("deckNext").addEventListener("click", () => { idleUntil = performance.now() + 8000; go(cur + 1); });
