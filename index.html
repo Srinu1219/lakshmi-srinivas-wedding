@@ -375,6 +375,14 @@ form label.choice input { -webkit-appearance: none; appearance: none; width: 22p
 form label.choice input:checked { background: radial-gradient(circle, var(--antique) 0 42%, rgba(255,250,235,.7) 47%); }
 form label.choice input:focus-visible { outline: 2px solid var(--sepia); outline-offset: 2px; }
 form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.35; color: var(--sepia); padding: 18px 4px 10px; }
+
+/* ---- Background song toggle */
+.music-btn { position: fixed; z-index: 40; right: calc(14px + env(safe-area-inset-right, 0px)); bottom: calc(14px + env(safe-area-inset-bottom, 0px));
+  width: 46px; height: 46px; padding: 0; border-radius: 50%; display: grid; place-items: center; font-size: 22px; line-height: 1;
+  color: #fbf1dc; background: var(--foil-dark); border: 1px solid #e4b75a; box-shadow: 0 6px 16px rgba(0,0,0,.45); text-transform: none; letter-spacing: 0; }
+.music-btn.off { opacity: .75; }
+@media (prefers-reduced-motion: no-preference) { .music-btn:not(.off) { animation: musicpulse 2.4s ease-in-out infinite; } }
+@keyframes musicpulse { 50% { box-shadow: 0 6px 16px rgba(0,0,0,.45), 0 0 0 6px rgba(228,183,90,.18); } }
 </style>
 </head>
 <body>
@@ -392,6 +400,7 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
     <button type="button" class="gate-btn" id="openGate">Tap the seal to enter</button>
   </div>
 </div>
+<button type="button" id="muteBtn" class="music-btn off" aria-label="Play music" aria-pressed="true" hidden>♪̸</button>
 <main>
   <div class="fold-wrap" id="foldWrap">
   <section class="card" aria-label="Invitation">
@@ -558,10 +567,46 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
 (function () {
   const gate = document.getElementById("gate");
   let opened = false;
-  function bell() {}
+  const song = new Audio("music.mp3");
+  song.loop = true; song.preload = "auto"; song.volume = 0;
+  const muteBtn = document.getElementById("muteBtn");
+  let fading = null, wantOn = false;
+  function fadeTo(target, ms) {
+    clearInterval(fading);
+    const step = (target - song.volume) / Math.max(1, ms / 50);
+    fading = setInterval(() => {
+      const v = song.volume + step;
+      if ((step >= 0 && v >= target) || (step < 0 && v <= target)) { song.volume = target; clearInterval(fading); if (target === 0) song.pause(); }
+      else song.volume = Math.min(1, Math.max(0, v));
+    }, 50);
+  }
+  function setMuteLabel() {
+    const on = wantOn && !song.paused;
+    muteBtn.setAttribute("aria-pressed", String(!on));
+    muteBtn.setAttribute("aria-label", on ? "Pause music" : "Play music");
+    muteBtn.textContent = on ? "♪" : "♪̸";
+    muteBtn.classList.toggle("off", !on);
+  }
+  function bell() {
+    try {
+      const p = song.play();
+      wantOn = true;
+      if (p && p.then) p.then(() => { fadeTo(0.55, 2500); muteBtn.hidden = false; setMuteLabel(); }).catch(() => { wantOn = false; muteBtn.hidden = false; setMuteLabel(); });
+      else { fadeTo(0.55, 2500); muteBtn.hidden = false; }
+    } catch (e) { muteBtn.hidden = false; }
+  }
+  muteBtn.addEventListener("click", () => {
+    if (!wantOn || song.paused) {
+      wantOn = true; const p = song.play();
+      if (p && p.then) p.then(() => { fadeTo(0.55, 800); setMuteLabel(); }).catch(() => { wantOn = false; setMuteLabel(); });
+      else { fadeTo(0.55, 800); }
+      setMuteLabel();
+    } else { wantOn = false; fadeTo(0, 500); setMuteLabel(); }
+  });
+  document.addEventListener("visibilitychange", () => { if (document.hidden) song.pause(); else if (wantOn) { const p = song.play(); if (p && p.catch) p.catch(() => {}); } });
   function openGate(withSound) {
     if (opened) return; opened = true;
-    /* silent until a real Om recording is added */
+    if (withSound) bell();
     gate.classList.add("open");
     window.scrollTo(0, 0);
     setTimeout(() => { gate.hidden = true; }, 3000);
@@ -569,6 +614,7 @@ form.done .msg.ok { font-family: var(--script); font-size: 34px; line-height: 1.
   document.getElementById("openGate").addEventListener("click", () => openGate(true));
   document.getElementById("doorway").addEventListener("click", () => openGate(true));
   setTimeout(() => openGate(false), 12000);
+  setTimeout(() => { muteBtn.hidden = false; setMuteLabel(); }, 12500);
   // pencil draws the temple on load
   const tsvg = gate.querySelector(".temple"), dp = tsvg && tsvg.querySelector(".draw");
   const still = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
