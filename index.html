@@ -529,6 +529,20 @@ html.deck .leaf.cur.fx-open > * { animation: openin 1.3s cubic-bezier(.3,.7,.2,1
   100% { clip-path: inset(0 0 0 0); filter: brightness(1); } }
 #deckDots { display: none !important; }
 .deck-nav { gap: 22px; }
+/* ---- Letter-by-letter and word-by-word writing */
+html.deck .wr.split { opacity: 1; clip-path: none !important; animation: none !important; }
+html.deck .wr.split .wl, html.deck .wr.split .ww { display: inline-block; opacity: 0; }
+html.deck .wr.split .wl { transform: translateY(.18em) scale(.85) rotate(-6deg); filter: blur(5px); padding: .05em 0; }
+html.deck .wr.split .ww { transform: translateY(8px); filter: blur(3px); }
+html.deck .wr.split.go .wl { animation: letterin .55s cubic-bezier(.2,.7,.3,1) forwards; animation-delay: var(--d, 0s); }
+html.deck .wr.split.go .ww { animation: wordin .7s ease forwards; animation-delay: var(--d, 0s); }
+@keyframes letterin { 60% { opacity: 1; filter: blur(0); } to { opacity: 1; transform: none; filter: none; } }
+@keyframes wordin { to { opacity: 1; transform: none; filter: none; } }
+html.deck .foil.split { background: none !important; }
+html.deck .foil.split .wl, html.deck .foil.split .ww { background: var(--foil-dark); background-size: 300% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; }
+html.deck footer .fin.split .wl { background: none; color: #7a4a14; -webkit-text-fill-color: #7a4a14; }
+/* ---- Gentle petals and sparkles */
+#petals { position: fixed; inset: 0; z-index: 25; pointer-events: none; }
 </style>
 </head>
 <body>
@@ -834,20 +848,51 @@ html.deck .leaf.cur.fx-open > * { animation: openin 1.3s cubic-bezier(.3,.7,.2,1
   leaves[0].classList.add("cur");
   const PEN = "h1, h2, .tag, .big, .fin, .monogram-wrap, .when strong, .place b";
   const TXT = ".eyebrow, .blessing, .verse, .sub, .when, .place > span, .shloka .sl, .muhurtham, .venue-note, .contact, footer > span:last-child, .om, .rule, .links, .emblem-wrap";
+  const SPLIT_L = "h1, h2, .tag, .big, .fin, .when strong, .place b";
+  const SPLIT_W = ".eyebrow, .blessing, .verse, .sub, .place > span, .shloka .sl, .muhurtham, .venue-note, footer > span:last-child";
+  function splitEl(el, mode) {
+    const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+    const nodes = []; while (walker.nextNode()) nodes.push(walker.currentNode);
+    const parts = [];
+    nodes.forEach((tn) => {
+      const frag = document.createDocumentFragment();
+      const bits = mode === "l" ? Array.from(tn.nodeValue) : tn.nodeValue.split(/(\s+)/);
+      bits.forEach((b) => {
+        if (!b) return;
+        if (/^\s+$/.test(b)) { frag.appendChild(document.createTextNode(b)); return; }
+        const sp = document.createElement("span"); sp.className = mode === "l" ? "wl" : "ww"; sp.textContent = b;
+        frag.appendChild(sp); parts.push(sp);
+      });
+      tn.parentNode.replaceChild(frag, tn);
+    });
+    return parts;
+  }
   function prep(leaf) {
     const els = Array.from(leaf.querySelectorAll(PEN + "," + TXT)).filter((el) => !el.closest(".flap") && !el.closest("form label") && !el.parentElement.closest(".wr"));
-    els.forEach((el) => { el.classList.add("wr"); if (el.matches(PEN)) el.classList.add("pen"); });
+    els.forEach((el) => {
+      el.classList.add("wr"); if (el.matches(PEN)) el.classList.add("pen");
+      if (el.matches(SPLIT_L)) { el._parts = splitEl(el, "l"); el.classList.add("split"); }
+      else if (el.matches(SPLIT_W)) { el._parts = splitEl(el, "w"); el.classList.add("split"); }
+    });
     leaf._wr = els;
   }
   function write(leaf) {
-    if (!leaf._wr || leaf._written) return; leaf._written = true;
+    if (!leaf._wr || leaf._written) return 0; leaf._written = true;
     let d = 0;
-    leaf._wr.forEach((el) => { el.style.setProperty("--d", d.toFixed(2) + "s"); el.classList.add("go"); d += el.classList.contains("pen") ? 0.7 : 0.28; d = Math.min(d, 6); });
+    leaf._wr.forEach((el) => {
+      el.style.setProperty("--d", d.toFixed(2) + "s"); el.classList.add("go");
+      if (el._parts) {
+        const step = el.classList.contains("pen") ? 0.055 : 0.11;
+        el._parts.forEach((p, i) => p.style.setProperty("--d", (d + i * step).toFixed(2) + "s"));
+        d += Math.min(el._parts.length * step, 2.4) + 0.15;
+      } else d += el.classList.contains("pen") ? 0.6 : 0.25;
+    });
+    return d;
   }
   leaves.forEach(prep);
   const fw = document.getElementById("foldWrap");
   if (fw) {
-    const fo = new MutationObserver(() => { if (fw.classList.contains("unfold")) { fo.disconnect(); setTimeout(() => write(leaves[0]), 500); } });
+    const fo = new MutationObserver(() => { if (fw.classList.contains("unfold")) { fo.disconnect(); setTimeout(() => { const d = write(leaves[0]); holdUntil = Math.max(holdUntil, performance.now() + d * 1000 + 1500); }, 500); } });
     fo.observe(fw, { attributes: true, attributeFilter: ["class"] });
     if (fw.classList.contains("unfold")) setTimeout(() => write(leaves[0]), 500);
   } else write(leaves[0]);
@@ -862,9 +907,9 @@ html.deck .leaf.cur.fx-open > * { animation: openin 1.3s cubic-bezier(.3,.7,.2,1
     const fx = ["fx-left", "fx-fold", "fx-up", "fx-open", "fx-right"][turnCount++ % 5];
     from.classList.remove("cur"); from.classList.add("going", fx);
     next.classList.add("cur", "arrive", fx);
-    setTimeout(() => write(next), 500);
     cur = to; paint();
-    holdUntil = performance.now() + 4800;
+    holdUntil = performance.now() + 6000;
+    setTimeout(() => { const d = write(next); holdUntil = Math.max(holdUntil, performance.now() + d * 1000 + 1800); }, 500);
     setTimeout(() => { from.classList.remove("going", fx); next.classList.remove("arrive", fx); busy = false; }, fx === "fx-fold" ? 1800 : 1750);
   }
   window.__deckShow = (el) => { const i = leaves.findIndex((l) => l.contains(el)); if (i >= 0) { auto = false; go(i); } };
@@ -900,5 +945,42 @@ html.deck .leaf.cur.fx-open > * { animation: openin 1.3s cubic-bezier(.3,.7,.2,1
     const mo = new MutationObserver(() => { if (gate.classList.contains("open")) { mo.disconnect(); setTimeout(start, 6200); } });
     mo.observe(gate, { attributes: true, attributeFilter: ["class"] });
   }
+})();
+</script>
+<canvas id="petals" aria-hidden="true"></canvas>
+<script>
+(function () {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c = document.getElementById("petals"), x = c.getContext("2d");
+  let W = 0, H = 0, dpr = Math.min(2, window.devicePixelRatio || 1), on = false;
+  function size() { W = innerWidth; H = innerHeight; c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); }
+  size(); addEventListener("resize", size);
+  const cols = ["#f29b1d", "#ffc23a", "#e8606e", "#f5b35a"];
+  const P = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random() * -1, r: 4 + Math.random() * 5, v: 18 + Math.random() * 22, s: Math.random() * 6, a: Math.random() * 6.3, c: cols[(Math.random() * cols.length) | 0] }));
+  const S = Array.from({ length: 18 }, () => ({ x: Math.random(), y: Math.random(), p: Math.random() * 6.3, r: 1 + Math.random() * 1.6 }));
+  let last = 0;
+  function frame(t) {
+    const dt = last ? Math.min(.05, (t - last) / 1000) : .016; last = t;
+    x.clearRect(0, 0, W, H);
+    if (on && !document.hidden) {
+      S.forEach((s) => { const a = Math.max(0, Math.sin(t / 700 + s.p)); if (a < .05) return; x.globalAlpha = a * .8; x.fillStyle = "#ffe9a8";
+        const px = s.x * W, py = s.y * H, r = s.r * (1 + a);
+        x.beginPath(); x.moveTo(px, py - r * 3); x.lineTo(px + r * .6, py); x.lineTo(px, py + r * 3); x.lineTo(px - r * .6, py); x.closePath(); x.fill();
+        x.beginPath(); x.moveTo(px - r * 3, py); x.lineTo(px, py + r * .6); x.lineTo(px + r * 3, py); x.lineTo(px, py - r * .6); x.closePath(); x.fill(); });
+      P.forEach((p) => {
+        p.y += p.v * dt / H; p.a += dt * 1.4; const px = p.x * W + Math.sin(t / 900 + p.s) * 24, py = p.y * H;
+        if (py > H + 20) { p.y = -0.05; p.x = Math.random(); }
+        x.save(); x.translate(px, py); x.rotate(p.a); x.globalAlpha = .75; x.fillStyle = p.c;
+        x.beginPath(); x.ellipse(0, 0, p.r, p.r * .55, 0, 0, 6.283); x.fill(); x.restore();
+      });
+      x.globalAlpha = 1;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  const gate = document.getElementById("gate");
+  const go = () => { on = true; };
+  if (!gate || gate.hidden) setTimeout(go, 1500);
+  else new MutationObserver((m, o) => { if (gate.classList.contains("open")) { o.disconnect(); setTimeout(go, 2500); } }).observe(gate, { attributes: true, attributeFilter: ["class"] });
 })();
 </script>
