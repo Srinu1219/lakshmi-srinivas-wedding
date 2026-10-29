@@ -543,6 +543,21 @@ html.deck .foil.split .wl, html.deck .foil.split .ww { background: var(--foil-da
 html.deck footer .fin.split .wl { background: none; color: #7a4a14; -webkit-text-fill-color: #7a4a14; }
 /* ---- Gentle petals and sparkles */
 #petals { position: fixed; inset: 0; z-index: 25; pointer-events: none; }
+
+/* ---- Contrast: solid deep gold for written letters, darker small labels */
+html.deck .foil.split .wl, html.deck .foil.split .ww, html.deck footer .fin.split .wl {
+  background: none !important; color: #6b4210 !important; -webkit-text-fill-color: #6b4210 !important;
+  text-shadow: 0 1px 0 rgba(255,248,230,.85), 0 0 1px rgba(80,45,10,.35); }
+html.deck .leaf .eyebrow, html.deck .leaf .fin-date, html.deck .leaf .muhurtham b, html.deck .leaf .venue-note b, html.deck .leaf label { color: #6e4512 !important; -webkit-text-fill-color: #6e4512; }
+html.deck .leaf .blessing, html.deck .leaf .verse, html.deck .leaf .shloka .sl, html.deck .leaf .sub, html.deck .leaf .venue-note, html.deck .leaf .note, html.deck .leaf footer > span:last-child { color: #4e2c14 !important; -webkit-text-fill-color: #4e2c14; }
+html.deck .leaf .when, html.deck .leaf #addr, html.deck .leaf .contact-num { color: #3b1d10 !important; }
+html.deck .monogram.foil { background: none !important; color: #6b4210; -webkit-text-fill-color: #6b4210; }
+html.deck .temple-bg { opacity: .16 !important; }
+
+html.deck footer .wl, html.deck footer .ww { font: inherit !important; letter-spacing: inherit; }
+html.deck footer > span:last-child .ww { color: #4e2c14 !important; -webkit-text-fill-color: #4e2c14 !important; }
+html.deck footer .fin-date { color: #6e4512 !important; -webkit-text-fill-color: #6e4512 !important; }
+html.deck footer .fin { font-size: 72px !important; line-height: 1.2; }
 </style>
 </head>
 <body>
