@@ -591,6 +591,11 @@ html.deck .leaf.going.fx-crumple > * { transform-origin: 50% 45%; overflow: hidd
 html.deck .leaf.arrive.fx-crumple::after { display: none; }
 html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
 @keyframes settlein { from { filter: brightness(.8); } to { filter: none; } }
+
+#rsvp.locked label, #rsvp.locked fieldset, #rsvp.locked .primary, #rsvp.locked .note { opacity: .4; filter: grayscale(.6); pointer-events: none; }
+#rsvp .abroad-note { margin: 4px 0 2px; padding: 12px 14px; text-align: center; font-size: 16px; line-height: 1.45; color: #4e2c14; border: 1px dotted rgba(138,90,28,.6); border-radius: 10px; background: rgba(255,248,230,.6); }
+#rsvp .abroad-note b { display: block; font-size: 18px; margin-bottom: 2px; color: #6e4512; }
+#rsvp .abroad-note a { color: #6e4512; }
 </style>
 </head>
 <body>
@@ -614,6 +619,15 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
   <filter id="crumpleFx" x="-10%" y="-10%" width="120%" height="120%"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="3" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="26" xChannelSelector="R" yChannelSelector="G"/></filter>
   <filter id="crumpleFx2" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="3" seed="3" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="60" xChannelSelector="R" yChannelSelector="G"/></filter>
 </svg>
+<script>
+/* Guests outside the US can see the RSVP form but not fill it. ?rsvp=1 in the link unlocks it. */
+(function () {
+  var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  var US = /^(America\/(New_York|Detroit|Chicago|Denver|Phoenix|Boise|Los_Angeles|Anchorage|Juneau|Sitka|Yakutat|Nome|Metlakatla|Adak|Menominee|Indiana\/.+|Kentucky\/.+|North_Dakota\/.+|Indianapolis|Louisville|Fort_Wayne|Knox_IN|Shiprock|Atka)|US\/.+|Pacific\/(Honolulu|Johnston)|EST5EDT|CST6CDT|MST7MDT|PST8PDT|EST|MST|HST)$/;
+  var open = /[?&]rsvp=1\b/.test(location.search);
+  window.__abroad = !!tz && !US.test(tz) && !open;
+})();
+</script>
 <main>
   <div class="fold-wrap" id="foldWrap">
   <section class="card" aria-label="Invitation">
@@ -769,7 +783,16 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
     if (here !== ny) { $("localTime").textContent = "Your local time: " + here; $("localTime").hidden = false; }
   } catch (e) {}
   const msg = (t, cls) => { $("msg").textContent = t; $("msg").className = "msg " + (cls || ""); };
+  if (window.__abroad) {
+    const f = $("rsvp");
+    f.classList.add("locked");
+    f.querySelectorAll("input, select, button, textarea").forEach((el) => { el.disabled = true; el.tabIndex = -1; });
+    const n = document.createElement("p"); n.className = "abroad-note";
+    n.innerHTML = "<b>Your blessings reach us wherever you are</b>RSVP is for guests joining us in New Jersey. If you are travelling for the wedding, please WhatsApp Srinivas at <a href=\"https://wa.me/14845881413\">+1 (484) 588-1413</a>.";
+    f.insertBefore(n, $("save"));
+  }
   $("rsvp").addEventListener("submit", async (ev) => {
+    if (window.__abroad) { ev.preventDefault(); return; }
     ev.preventDefault();
     const f = ev.target, name = $("name").value.trim(), rawPhone = $("phone").value.trim(), email = $("email").value.trim();
     if (!name) { msg("Please enter your name.", "err"); $("name").focus(); return; }
@@ -947,6 +970,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
   document.documentElement.classList.add("deck");
   const formLeaf = leaves.findIndex((l) => l.querySelector("#rsvp"));
   const lastLeaf = leaves.length - 1;
+  const stopAt = window.__abroad ? lastLeaf : formLeaf;
   leaves[lastLeaf].classList.add("center");
   const nav = document.getElementById("deckNav"), dots = document.getElementById("deckDots");
   leaves.forEach(() => dots.appendChild(document.createElement("i")));
@@ -1034,7 +1058,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
   const SPEED = 50;
   function tick(t) {
     const dt = last ? Math.min(100, t - last) : 16; last = t;
-    if (auto && !busy && t > holdUntil && t > idleUntil && cur < formLeaf) {
+    if (auto && !busy && t > holdUntil && t > idleUntil && cur < stopAt) {
       const l = leaves[cur];
       const sc = scroller(l);
       const room = sc.scrollHeight - sc.clientHeight - sc.scrollTop;
