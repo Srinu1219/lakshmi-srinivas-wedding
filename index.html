@@ -24,9 +24,9 @@ body{margin:0;font:14px/1.4 system-ui,sans-serif} img{max-width:100%} [hidden]{d
 
 /* ---- Kalamkari border on every page */
 .kal { position: absolute !important; left: 50%; width: min(calc(100% - 28px), 380px); transform: translateX(-50%); pointer-events: none; z-index: 0 !important; display: block; background: no-repeat center / 100% 100%; }
-.kal-t { top: 12px; aspect-ratio: 400 / 64; background-image: url("kal-top-g.svg?v=1"); }
-.kal-b { bottom: 12px; aspect-ratio: 400 / 64; background-image: url("kal-bottom-g.svg?v=1"); }
-.kal-r { position: absolute !important; display: block; width: 18px; height: 18px; pointer-events: none; z-index: 0 !important; background: url("kal-rose-g.svg?v=1") center / contain no-repeat; }
+.kal-t { top: 12px; aspect-ratio: 400 / 64; background-image: url("kal-top-m.svg?v=1"); }
+.kal-b { bottom: 12px; aspect-ratio: 400 / 64; background-image: url("kal-bottom-m.svg?v=1"); }
+.kal-r { position: absolute !important; display: block; width: 18px; height: 18px; pointer-events: none; z-index: 0 !important; background: url("kal-rose-m.svg?v=1") center / contain no-repeat; }
 .kal-r.a { left: 5px; top: 34%; } .kal-r.b { left: 5px; top: 58%; } .kal-r.c { right: 5px; top: 34%; } .kal-r.d { right: 5px; top: 58%; }
 .kal-r { width: 14px !important; height: 14px !important; }
 html.deck .leaf > .heart, html.deck .leaf > .invite, html.deck .leaf > #rsvp, html.deck .leaf > footer { padding-top: 70px !important; padding-bottom: 96px !important; }
@@ -130,6 +130,37 @@ html.deck .leaf.going .patrika-wrap .pk-couple { opacity: 1; animation: none; }
 html.deck .leaf.cur .pk-halo { animation: halo 4.8s ease-in-out 1s both; }
 @keyframes halo { 0% { opacity: 0; transform: scale(.7); } 45% { opacity: 1; transform: scale(1.05); } 100% { opacity: 0; transform: scale(1.15); } }
 @media (prefers-reduced-motion: reduce) { html.deck .leaf .patrika-wrap .pk-couple { opacity: 1; animation: none !important; } .pk-halo { display: none; } }
+
+/* ===== COLOUR DEMO: pasupu, kumkum, mango leaf, marigold ===== */
+html.deck .leaf > .heart, html.deck .leaf > .invite, html.deck .leaf > #rsvp, html.deck .leaf > footer, html.deck .leaf .card { isolation: isolate; }
+.kal-tint { position: absolute !important; inset: 8px; z-index: -1 !important; pointer-events: none; display: block; border-radius: 2px;
+  background: radial-gradient(ellipse at 50% 38%, rgba(255,206,64,.30), rgba(255,190,60,.12) 45%, transparent 72%),
+              radial-gradient(ellipse at 50% 100%, rgba(214,56,74,.14), transparent 55%),
+              radial-gradient(ellipse at 50% 0%, rgba(63,138,58,.10), transparent 45%); mix-blend-mode: multiply; }
+svg.hand { color: #8e1b2a !important; }
+html.deck .eyebrow, html.deck .eyebrow .ww, html.deck .eyebrow .wl { color: #1f6b4f !important; -webkit-text-fill-color: #1f6b4f !important; }
+html.deck .monogram-wrap { border-color: #c8762e !important; box-shadow: inset 0 0 0 5px rgba(255,236,190,.6), inset 0 0 0 6px rgba(200,118,46,.75), 0 0 0 3px rgba(255,193,7,.25) !important; background: radial-gradient(circle, rgba(255,206,64,.25), transparent 70%) !important; }
+html.deck .rule { filter: brightness(.6) saturate(2.3) hue-rotate(-8deg) !important; transform: scaleY(1.25); }
+html.deck #rsvp label, html.deck #rsvp legend, html.deck #rsvp label .ww, html.deck #rsvp legend .ww { color: #6e2a12 !important; -webkit-text-fill-color: #6e2a12 !important; font-size: 11.5px !important; }
+html.deck #rsvp input:not([type=radio]):not([type=checkbox]), html.deck #rsvp select { border-bottom: 1.6px solid #a0522d !important; background: rgba(255,250,236,.7) !important; color: #3b1d10 !important; }
+html.deck #rsvp input::placeholder { color: #b9a184 !important; font-style: italic; opacity: 1; }
+html.deck #rsvp label.choice { border: 1.5px solid #c8762e !important; background: rgba(255,250,236,.6) !important; color: #4e2c14 !important; font-size: 15px !important; }
+html.deck #rsvp label.consent { color: #4e2c14 !important; font-size: 14px !important; }
+html.deck footer .fin-date { font-size: 12.5px !important; color: #5a3410 !important; -webkit-text-fill-color: #5a3410 !important; }
+.kal-r { width: 17px !important; height: 17px !important; }
+html.deck #rsvp .primary { background: linear-gradient(180deg, #b0263a, #7a1222) !important; color: #ffe9a8 !important; border-color: #e4b75a !important; }
+html.deck .venue .links a, html.deck .venue button { border-color: #c8762e !important; color: #8e1b2a !important; }
+.demo-tag { position: fixed; z-index: 9999; top: calc(env(safe-area-inset-top,0px) + 4px); left: 50%; transform: translateX(-50%); background: #3d070d; color: #f3dfa6; border: 1px solid #e4b75a; border-radius: 999px; font: 600 10px/1 Georgia,serif; letter-spacing: .14em; padding: 5px 10px; pointer-events: none; white-space: nowrap; }
+
+/* gold light sweeping across the border flowers */
+.kal::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(255,226,120,1) 48%, #fff6d0 50%, rgba(255,226,120,1) 52%, transparent 62%) no-repeat; background-size: 260% 100%;
+  -webkit-mask: var(--kal-src) center / 100% 100% no-repeat; mask: var(--kal-src) center / 100% 100% no-repeat;
+  animation: kal-shine 6s ease-in-out infinite; }
+.kal-t { --kal-src: url("kal-top-m.svg?v=1"); } .kal-b { --kal-src: url("kal-bottom-m.svg?v=1"); }
+.kal-b::after { animation-delay: -3s; }
+@keyframes kal-shine { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
+@media (prefers-reduced-motion: reduce) { .kal::after { animation: none; opacity: 0; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
 <style>
@@ -744,7 +775,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
 </script>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <linearGradient id="inkShine" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1400" y2="0">
-<stop offset="0" stop-color="#6b4210"/><stop offset=".32" stop-color="#6b4210"/><stop offset=".43" stop-color="#b8862e"/><stop offset=".5" stop-color="#ffe9a8"/><stop offset=".57" stop-color="#b8862e"/><stop offset=".68" stop-color="#6b4210"/><stop offset="1" stop-color="#6b4210"/>
+<stop offset="0" stop-color="#8e1b2a"/><stop offset=".32" stop-color="#8e1b2a"/><stop offset=".43" stop-color="#c8762e"/><stop offset=".5" stop-color="#ffd36a"/><stop offset=".57" stop-color="#c8762e"/><stop offset=".68" stop-color="#8e1b2a"/><stop offset="1" stop-color="#8e1b2a"/>
 <animateTransform attributeName="gradientTransform" type="translate" values="-1600 0; 6200 0; 6200 0" keyTimes="0; .5; 1" dur="5.5s" repeatCount="indefinite"/>
 </linearGradient></defs></svg>
 <main>
@@ -1080,7 +1111,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
 (function(){
   document.querySelectorAll("main .card, main .heart, main figure.invite, main #rsvp, main footer#subham").forEach(function(p){
     if (getComputedStyle(p).position === "static") p.style.position = "relative";
-    ["kal kal-t","kal kal-b","kal-r a","kal-r b","kal-r c","kal-r d"].forEach(function(c){ var i=document.createElement("i"); i.className=c; i.setAttribute("aria-hidden","true"); p.insertBefore(i, p.firstChild); });
+    ["kal-tint","kal kal-t","kal kal-b","kal-r a","kal-r b","kal-r c","kal-r d"].forEach(function(c){ var i=document.createElement("i"); i.className=c; i.setAttribute("aria-hidden","true"); p.insertBefore(i, p.firstChild); });
   });
 })();
 </script>
@@ -1240,8 +1271,8 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
   let W = 0, H = 0, dpr = Math.min(2, window.devicePixelRatio || 1), on = false;
   function size() { W = innerWidth; H = innerHeight; c.width = W * dpr; c.height = H * dpr; x.setTransform(dpr, 0, 0, dpr, 0, 0); }
   size(); addEventListener("resize", size);
-  const cols = ["#f29b1d", "#ffc23a", "#e8606e", "#f5b35a"];
-  const P = Array.from({ length: 14 }, () => ({ x: Math.random(), y: Math.random() * -1, r: 4 + Math.random() * 5, v: 18 + Math.random() * 22, s: Math.random() * 6, a: Math.random() * 6.3, c: cols[(Math.random() * cols.length) | 0] }));
+  const cols = ["#ff8c00", "#ffc107", "#e91e63", "#ff5a5f", "#fff6e0", "#ff9800"];
+  const P = Array.from({ length: 22 }, () => ({ x: Math.random(), y: Math.random() * -1, r: 4 + Math.random() * 5, v: 18 + Math.random() * 22, s: Math.random() * 6, a: Math.random() * 6.3, c: cols[(Math.random() * cols.length) | 0] }));
   const S = Array.from({ length: 18 }, () => ({ x: Math.random(), y: Math.random(), p: Math.random() * 6.3, r: 1 + Math.random() * 1.6 }));
   let last = 0;
   function frame(t) {
@@ -1255,7 +1286,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
       P.forEach((p) => {
         p.y += p.v * dt / H; p.a += dt * 1.4; const px = p.x * W + Math.sin(t / 900 + p.s) * 24, py = p.y * H;
         if (py > H + 20) { p.y = -0.05; p.x = Math.random(); }
-        x.save(); x.translate(px, py); x.rotate(p.a); x.globalAlpha = .75; x.fillStyle = p.c;
+        x.save(); x.translate(px, py); x.rotate(p.a); x.globalAlpha = .9; x.fillStyle = p.c;
         x.beginPath(); x.ellipse(0, 0, p.r, p.r * .55, 0, 0, 6.283); x.fill(); x.restore();
       });
       x.globalAlpha = 1;
