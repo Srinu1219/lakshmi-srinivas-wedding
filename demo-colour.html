@@ -146,7 +146,14 @@ html.deck .leaf > .heart, html.deck .leaf > .invite, html.deck .leaf > #rsvp, ht
 svg.hand { color: #8e1b2a !important; }
 html.deck .eyebrow, html.deck .eyebrow .ww, html.deck .eyebrow .wl { color: #1f6b4f !important; -webkit-text-fill-color: #1f6b4f !important; }
 html.deck .monogram-wrap { border-color: #c8762e !important; box-shadow: inset 0 0 0 5px rgba(255,236,190,.6), inset 0 0 0 6px rgba(200,118,46,.75), 0 0 0 3px rgba(255,193,7,.25) !important; background: radial-gradient(circle, rgba(255,206,64,.25), transparent 70%) !important; }
-html.deck .rule { filter: hue-rotate(-12deg) saturate(1.8) !important; }
+html.deck .rule { filter: brightness(.6) saturate(2.3) hue-rotate(-8deg) !important; transform: scaleY(1.25); }
+html.deck #rsvp label, html.deck #rsvp legend, html.deck #rsvp label .ww, html.deck #rsvp legend .ww { color: #6e2a12 !important; -webkit-text-fill-color: #6e2a12 !important; font-size: 11.5px !important; }
+html.deck #rsvp input:not([type=radio]):not([type=checkbox]), html.deck #rsvp select { border-bottom: 1.6px solid #a0522d !important; background: rgba(255,250,236,.7) !important; color: #3b1d10 !important; }
+html.deck #rsvp input::placeholder { color: #b9a184 !important; font-style: italic; opacity: 1; }
+html.deck #rsvp label.choice { border: 1.5px solid #c8762e !important; background: rgba(255,250,236,.6) !important; color: #4e2c14 !important; font-size: 15px !important; }
+html.deck #rsvp label.consent { color: #4e2c14 !important; font-size: 14px !important; }
+html.deck footer .fin-date { font-size: 12.5px !important; color: #5a3410 !important; -webkit-text-fill-color: #5a3410 !important; }
+.kal-r { width: 17px !important; height: 17px !important; }
 html.deck #rsvp .primary { background: linear-gradient(180deg, #b0263a, #7a1222) !important; color: #ffe9a8 !important; border-color: #e4b75a !important; }
 html.deck .venue .links a, html.deck .venue button { border-color: #c8762e !important; color: #8e1b2a !important; }
 .demo-tag { position: fixed; z-index: 9999; top: calc(env(safe-area-inset-top,0px) + 4px); left: 50%; transform: translateX(-50%); background: #3d070d; color: #f3dfa6; border: 1px solid #e4b75a; border-radius: 999px; font: 600 10px/1 Georgia,serif; letter-spacing: .14em; padding: 5px 10px; pointer-events: none; white-space: nowrap; }
