@@ -8,7 +8,7 @@
 (function(){ var of = window.fetch; window.fetch = function(u, o){ if (String(u).indexOf("formsubmit") >= 0) return Promise.resolve(new Response('{"success":"true"}', {status:200, headers:{"Content-Type":"application/json"}})); return of.apply(this, arguments); };
   HTMLFormElement.prototype.submit = (function(orig){ return function(){ if (String(this.action).indexOf("formsubmit") >= 0) return; return orig.call(this); }; })(HTMLFormElement.prototype.submit); })();
 </script>
-<style>.pv-tag{position:fixed;z-index:9999;top:calc(env(safe-area-inset-top,0px) + 4px);left:50%;transform:translateX(-50%);background:#3d070d;color:#f3dfa6;border:1px solid #e4b75a;border-radius:999px;font:600 10px/1 Georgia,serif;letter-spacing:.14em;padding:5px 10px;pointer-events:none}</style>
+<style>.pv-tag{position:fixed;z-index:9999;top:calc(env(safe-area-inset-top,0px) + 4px);left:50%;transform:translateX(-50%);background:#3d070d;color:#f3dfa6;border:1px solid #e4b75a;border-radius:999px;font:600 10px/1 Georgia,serif;letter-spacing:.14em;padding:5px 10px;white-space:nowrap;pointer-events:none}</style>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Srinivasa Rao &amp; Venkata Lakshmi · Wedding Invitation</title>
 <meta name="description" content="You are invited to the wedding of Srinivasa Rao &amp; Venkata Lakshmi, 25 November 2026, Bridgewater Balaji Temple, NJ.">
@@ -93,6 +93,24 @@ footer .monogram-wrap.hanging { margin-bottom: 0 !important; }
 /* family line on the last page: keep the heading dark and clear */
 html.deck footer .family-by .eyebrow, html.deck footer .family-by .eyebrow .ww, html.deck footer .family-by .eyebrow .wl { color: #7a4e1a !important; -webkit-text-fill-color: #7a4e1a !important; font-size: 12px; letter-spacing: .2em; }
 html.deck footer .family-by .invited-by, html.deck footer .family-by .invited-by .ww, html.deck footer .family-by .invited-by .wl { color: #5a3410 !important; -webkit-text-fill-color: #5a3410 !important; }
+
+/* ---- pictures appear like a lamp being lit: from the centre, out of a soft glow */
+html.deck .leaf .invite img, html.deck .leaf .couple-photo img { opacity: 0; }
+html.deck .leaf.cur .invite img, html.deck .leaf.cur .couple-photo img { animation: lamp-reveal 2.8s cubic-bezier(.3,.1,.25,1) .5s both, lamp-glow 2.6s ease-in-out 3.1s 1 both; }
+html.deck .leaf.going .invite img, html.deck .leaf.going .couple-photo img { opacity: 1; animation: none; clip-path: none; filter: none; }
+@keyframes lamp-reveal {
+  0%   { opacity: 0; clip-path: circle(0% at 50% 45%); filter: blur(10px) brightness(1.6) sepia(.4); }
+  45%  { opacity: 1; filter: blur(4px) brightness(1.3) sepia(.25) drop-shadow(0 0 26px rgba(246,214,130,.95)); }
+  100% { opacity: 1; clip-path: circle(80% at 50% 45%); filter: blur(0) brightness(1) sepia(0) drop-shadow(0 0 0 rgba(246,214,130,0)); } }
+@keyframes lamp-glow {
+  0%, 100% { filter: drop-shadow(0 0 0 rgba(246,214,130,0)); }
+  50% { filter: drop-shadow(0 0 16px rgba(246,214,130,.85)); } }
+html.deck .invite { position: relative; }
+html.deck .leaf.cur .invite::after { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 3;
+  background: linear-gradient(105deg, transparent 35%, rgba(255,240,200,.55) 50%, transparent 65%); background-size: 250% 100%; background-repeat: no-repeat;
+  mix-blend-mode: soft-light; animation: lamp-sweep 2.2s ease-in-out 3.2s 1 both; }
+@keyframes lamp-sweep { from { background-position: 150% 0; opacity: 1; } to { background-position: -60% 0; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { html.deck .leaf .invite img, html.deck .leaf .couple-photo img { opacity: 1; animation: none !important; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
 <style>
