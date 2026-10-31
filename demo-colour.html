@@ -30,9 +30,9 @@ body{margin:0;font:14px/1.4 system-ui,sans-serif} img{max-width:100%} [hidden]{d
 
 /* ---- Kalamkari border on every page */
 .kal { position: absolute !important; left: 50%; width: min(calc(100% - 28px), 380px); transform: translateX(-50%); pointer-events: none; z-index: 0 !important; display: block; background: no-repeat center / 100% 100%; }
-.kal-t { top: 12px; aspect-ratio: 400 / 64; background-image: url("kal-top-c.svg?v=1"); }
-.kal-b { bottom: 12px; aspect-ratio: 400 / 64; background-image: url("kal-bottom-c.svg?v=1"); }
-.kal-r { position: absolute !important; display: block; width: 18px; height: 18px; pointer-events: none; z-index: 0 !important; background: url("kal-rose-c.svg?v=1") center / contain no-repeat; }
+.kal-t { top: 12px; aspect-ratio: 400 / 64; background-image: url("kal-top-m.svg?v=1"); }
+.kal-b { bottom: 12px; aspect-ratio: 400 / 64; background-image: url("kal-bottom-m.svg?v=1"); }
+.kal-r { position: absolute !important; display: block; width: 18px; height: 18px; pointer-events: none; z-index: 0 !important; background: url("kal-rose-m.svg?v=1") center / contain no-repeat; }
 .kal-r.a { left: 5px; top: 34%; } .kal-r.b { left: 5px; top: 58%; } .kal-r.c { right: 5px; top: 34%; } .kal-r.d { right: 5px; top: 58%; }
 .kal-r { width: 14px !important; height: 14px !important; }
 html.deck .leaf > .heart, html.deck .leaf > .invite, html.deck .leaf > #rsvp, html.deck .leaf > footer { padding-top: 70px !important; padding-bottom: 96px !important; }
@@ -157,6 +157,16 @@ html.deck footer .fin-date { font-size: 12.5px !important; color: #5a3410 !impor
 html.deck #rsvp .primary { background: linear-gradient(180deg, #b0263a, #7a1222) !important; color: #ffe9a8 !important; border-color: #e4b75a !important; }
 html.deck .venue .links a, html.deck .venue button { border-color: #c8762e !important; color: #8e1b2a !important; }
 .demo-tag { position: fixed; z-index: 9999; top: calc(env(safe-area-inset-top,0px) + 4px); left: 50%; transform: translateX(-50%); background: #3d070d; color: #f3dfa6; border: 1px solid #e4b75a; border-radius: 999px; font: 600 10px/1 Georgia,serif; letter-spacing: .14em; padding: 5px 10px; pointer-events: none; white-space: nowrap; }
+
+/* gold light sweeping across the border flowers */
+.kal::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(100deg, transparent 38%, rgba(255,226,120,1) 48%, #fff6d0 50%, rgba(255,226,120,1) 52%, transparent 62%) no-repeat; background-size: 260% 100%;
+  -webkit-mask: var(--kal-src) center / 100% 100% no-repeat; mask: var(--kal-src) center / 100% 100% no-repeat;
+  animation: kal-shine 6s ease-in-out infinite; }
+.kal-t { --kal-src: url("kal-top-m.svg?v=1"); } .kal-b { --kal-src: url("kal-bottom-m.svg?v=1"); }
+.kal-b::after { animation-delay: -3s; }
+@keyframes kal-shine { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
+@media (prefers-reduced-motion: reduce) { .kal::after { animation: none; opacity: 0; } }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
 <style>
