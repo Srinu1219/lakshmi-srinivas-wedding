@@ -881,19 +881,19 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
           <option value="60">🇲🇾 +60 Malaysia</option>
           <option value="">Other +code</option>
         </select>
-        <input id="phone" name="phone" type="tel" autocomplete="tel-national" placeholder="Number">
+        <input id="phone" name="phone" type="tel" autocomplete="tel-national" placeholder="Number" required>
       </span>
     </label>
-    <label for="email">Email
-      <input id="email" name="email" type="email" autocomplete="email">
+    <label for="email">Email *
+      <input id="email" name="email" type="email" autocomplete="email" required placeholder="name@example.com">
     </label>
     <fieldset class="attend" id="attendSet">
       <legend>Will you attend? *</legend>
       <label class="choice"><input type="radio" name="attending" value="yes"> Joyfully attending</label>
       <label class="choice"><input type="radio" name="attending" value="no"> Regretfully can't attend</label>
     </fieldset>
-    <label for="guests" id="guestsLbl">Number of guests
-      <input id="guests" name="guests" type="number" min="1" max="20" inputmode="numeric" autocomplete="off" placeholder="e.g. 4">
+    <label for="guests" id="guestsLbl">Number of guests (max 5)
+      <input id="guests" name="guests" type="number" min="1" max="5" inputmode="numeric" autocomplete="off" placeholder="e.g. 4">
     </label>
     <label class="consent" for="consent" id="consentLbl"><input id="consent" name="reminders" type="checkbox" value="yes" checked> Yes, remind me before the wedding</label>
     <button class="primary" id="save" type="submit">Send my details</button>
@@ -955,13 +955,14 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
       else if (d.startsWith(cc) && d.length > 10) phone = "+" + d;
       else phone = "+" + cc + d.replace(/^0+/, "");
     }
-    if (!phone && !email) { msg("Please add your WhatsApp number or email so we can send you a reminder.", "err"); $("phone").focus(); return; }
+    if (!phone) { msg("Please add your WhatsApp number.", "err"); $("phone").focus(); return; }
+    if (!email) { msg("Please add your email address.", "err"); $("email").focus(); return; }
     if (phone && phone.replace(/\D/g, "").length < 8) { msg("Please check the WhatsApp number, including the country code.", "err"); $("phone").focus(); return; }
     if (email && !/^\S+@\S+\.\S+$/.test(email)) { msg("That email address doesn't look right. Please check it.", "err"); $("email").focus(); return; }
     const att = (f.querySelector('input[name="attending"]:checked') || {}).value;
     if (!att) { msg("Please let us know if you will attend.", "err"); $("attendSet").scrollIntoView({ block: "center" }); return; }
     const gv = $("guests").value.trim();
-    if (att === "yes" && gv && !(/^\d{1,2}$/.test(gv) && +gv >= 1 && +gv <= 20)) { msg("Please enter how many people are coming (1 to 20).", "err"); $("guests").focus(); return; }
+    if (att === "yes" && gv && !(/^\d{1,2}$/.test(gv) && +gv >= 1 && +gv <= 5)) { msg("Please enter how many people are coming (1 to 5).", "err"); $("guests").focus(); return; }
     if (navigator.onLine === false) { msg("You seem to be offline. Please connect to the internet and tap Send again.", "err"); return; }
     $("save").disabled = true; msg("Sending…");
     try {
