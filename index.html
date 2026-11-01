@@ -161,6 +161,9 @@ html.deck .venue .links a, html.deck .venue button { border-color: #c8762e !impo
 .kal-b::after { animation-delay: -3s; }
 @keyframes kal-shine { 0% { background-position: 130% 0; } 55%, 100% { background-position: -30% 0; } }
 @media (prefers-reduced-motion: reduce) { .kal::after { animation: none; opacity: 0; } }
+
+/* centre every text block on its page (the "Witnessed by…" box was sitting on the left in Safari) */
+html.deck .leaf .verse, html.deck .leaf .pancha, html.deck .leaf .blessing, html.deck .leaf .sub, html.deck .leaf .muhurtham, html.deck .leaf .venue-note, html.deck .leaf .shloka, html.deck .leaf .invited-by { margin-left: auto !important; margin-right: auto !important; justify-self: center !important; text-align: center; }
 </style>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=Great+Vibes&family=Cinzel:wght@400;500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap">
 <style>
