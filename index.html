@@ -892,7 +892,7 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
       <label class="choice"><input type="radio" name="attending" value="yes"> Joyfully attending</label>
       <label class="choice"><input type="radio" name="attending" value="no"> Regretfully can't attend</label>
     </fieldset>
-    <label for="guests" id="guestsLbl">Number of guests (max 5)
+    <label for="guests" id="guestsLbl">Number of guests
       <input id="guests" name="guests" type="number" min="1" max="5" inputmode="numeric" autocomplete="off" placeholder="e.g. 4">
     </label>
     <label class="consent" for="consent" id="consentLbl"><input id="consent" name="reminders" type="checkbox" value="yes" checked> Yes, remind me before the wedding</label>
@@ -932,6 +932,9 @@ html.deck .leaf.cur.fx-crumple > * { animation: settlein .9s ease .5s both; }
     const ny = when.toLocaleString("en-US", { timeZone: "America/New_York", weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
     if (here !== ny) { $("localTime").textContent = "Your local time: " + here; $("localTime").hidden = false; }
   } catch (e) {}
+  // guests box: digits only, never more than 5
+  (function(){ const g=$("guests"); if(!g) return; const fix=()=>{ let v=String(g.value||"").replace(/\D/g,"").slice(-1); if(v!==""){ let n=+v; if(n>5) n=5; if(n<1) n=1; v=String(n);} if(g.value!==v) g.value=v; };
+    g.addEventListener("input",fix); g.addEventListener("change",fix); g.addEventListener("blur",fix); })();
   const msg = (t, cls) => { $("msg").textContent = t; $("msg").className = "msg " + (cls || ""); };
   if (window.__abroad) {
     const f = $("rsvp");
